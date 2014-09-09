@@ -41,8 +41,10 @@
 <body>
 <h1><img src="http://bingweb.binghamton.edu/~xxin1/butterfly.png" width="40" height="40">入声字<span style="font-weight:normal;font-size:24px">T_T</span></h1>
 <p>测试中！求用求反馈！微博<a href="http://weibo.com/lsngb/" target="_blank">@乱煞年光遍</a></p>
-<input type="text"  placeholder="入声字" style="width:200px;">
-<input type="submit" name="userInput" value="确定" onclick="get_user_input()">
+
+<input type="text"  placeholder="入声字" style="width:200px;" autofocus onkeydown="if(event.keyCode==13){get_user_input();}">
+<input type="submit" name="userInput" value="确定" onclick="get_user_input()" >
+
 <div class="note">请输入下列句子中<span style="color:#ff0000;font-weight:bold">所有的</span>入声字</div>
 <div class="example"></div>
 
