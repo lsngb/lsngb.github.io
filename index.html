@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <head>
-	<script src="/jquery-1.11.1.js"></script>
-	<script type="text/javascript" src="/examples.js"></script>
-	<script type="text/javascript" src="/elements.js"></script>
+	<script src="jquery-1.11.1.js"></script>
+	<script type="text/javascript" src="examples.js"></script>
+	<script type="text/javascript" src="elements.js"></script>
+	<script type="text/javascript" src="multi.js"></script>
 	<title>找不完的入声字</title>
 	<style>
 	body{
@@ -22,7 +23,7 @@
 	}
 	input{
 		font-size: 14px;
-		height : 25px;
+		height : 22px;
 		padding-left: 7px;
 		margin-bottom: 10px;
 	}
@@ -41,11 +42,12 @@
 </head>
 
 <body>
-<h1><img src="/butterfly.png" width="40" height="40">入声字<span style="font-weight:normal;font-size:24px">T_T</span></h1>
+<h1><img src="butterfly.png" width="40" height="40">入声字<span style="font-weight:normal;font-size:24px">T_T</span></h1>
 <p>测试中！求用求反馈！微博<a href="http://weibo.com/lsngb/" target="_blank">@乱煞年光遍</a></p>
+<p><span style='color:#4B5CC4;font-weight:bold;'>蓝色</span>字体为多音字，请自行判断是否为入声<br>（判断结果不影响最终结果）</p>
 
-<input type="text"  placeholder="入声字" style="width:200px;" autofocus onkeydown="if(event.keyCode==13){get_user_input();}">
-<input type="submit" name="userInput" value="确定" onclick="get_user_input()" >
+<input type="text"  placeholder="入声字" style="width:300px;" autofocus="focus" onkeydown="if(event.keyCode==13){get_user_input();}">
+<input type="submit" name="userInput" value="确定" onclick="get_user_input();" >
 
 <div class="note">请输入下列句子中<span style="color:#ff0000;font-weight:bold">所有的</span>入声字</div>
 <div class="example"></div>
@@ -54,34 +56,58 @@
 <a href="http://sou-yun.com/" target="_blank">搜韵网</a>
 </div>
 <script>
-
+$(function() {$('[autofocus]').focus()});
+var example_rusheng=[];
+var characters=[];
+var print_example="";
+var multi_chars=[];
 //随机数
 var ram_num=function(min,max){
     return Math.floor(Math.random()*(max-min+1)+min);
 }
-//打印随机诗句
-var print_example = examples[ram_num(0,examples.length-1)];
-$('.example').html(print_example);
-
-
-var get_user_input=function(){
-	$('.note').html('请输入下列句子中<span style="color:#ff0000;font-weight:bold">所有的</span>入声字');
-
+var print_random=function(){
+	example_rusheng=[];
+	characters=[];
+	multi_chars=[];
+	//find 随机诗句
+	print_example = examples[ram_num(0,examples.length-1)];
 
 	//诗句去标点
 	example_string=print_example.split(/，|。|！|？|“|”/).join("");
 	//诗句转字符array
-	var characters=example_string.split("");
+	characters=example_string.split("");
 
-	var example_rusheng=[];
+	//go through 诗句
+	for (var i=0;i<characters.length;i++){
+		//找出诗句中的入声字and put in example_rusheng
+		if (elements.indexOf(characters[i])+1>0 && example_rusheng.indexOf(characters[i])<0){
+			example_rusheng.push(characters[i]);
+			//找出多音字
+			if(multi.indexOf(characters[i])+1>0){
+				print_example=print_example.replace(characters[i],"<span style='color:#4B5CC4'>"+characters[i]+"</span>");
+				multi_chars.push(characters[i]);
+			}
+			$('.example').html(print_example);
+		}
+	}
+}
+print_random();
+var get_user_input=function(){
+
 	var not_example=[];
 	var not_rusheng=[];
 	var input_characters=[];
 
 	//get user input
 	var unprocessed_input=$('input:text').val();
-	if (unprocessed_input.length===0){return;}
+	
+	if (unprocessed_input.length===0){
+		$('.note').html('请输入下列句子中<span style="color:#ff0000;font-weight:bold">所有的</span>入声字');
+		return;
+	}
+
 	unprocessed_input=unprocessed_input.split(/，| |,/).join("");
+
 	//unprocessed user input convert to array
 	var unprocessed_characters=unprocessed_input.split("");
 	for(var i=0;i<unprocessed_input.length;i++){
@@ -90,6 +116,13 @@ var get_user_input=function(){
 		}
 	}
 
+	//combine multi char with input chars
+	for(var i=0;i<multi_chars.length;i++){
+		if(input_characters.indexOf(multi_chars[i])<0){
+			input_characters.push(multi_chars[i]);
+		}
+	}
+	
 	for (var i=0;i<input_characters.length;i++){
 		//find input not in example and put in not_example
 		if (characters.indexOf(input_characters[i])<0){
@@ -100,7 +133,6 @@ var get_user_input=function(){
 		//print a note
 		$('.note').html("字符"+"<span style='font-weight:bold'>“"+not_example+"”</span>不在诗句中，请重新输入");
 		$('.example').html(print_example);
-		
 		return;
 	}
 
@@ -116,18 +148,13 @@ var get_user_input=function(){
 		$('.example').html(print_example);
 		return;
 	}
-	//go through 诗句
-	for (var i=0;i<characters.length;i++){
-		//找出诗句中的入声字and put in example_rusheng
-		if (elements.indexOf(characters[i])+1>0 && example_rusheng.indexOf(characters[i])<0){
-			example_rusheng.push(characters[i]);
-		}
-	}
-	if (input_characters.length==example_rusheng.length){
-		$('.note').html("<span style='font-weight:bold'>↖(^ω^)↗答案正确！请继续</span>");
+
+	if (input_characters.length===example_rusheng.length){
 		$('input:text').val("");
-		print_example = examples[ram_num(0,examples.length-1)];
-		$('.example').html(print_example);
+		$('.note').html("<span style='font-weight:bold'>↖(^ω^)↗答案正确！请继续</span>");
+		
+		print_random();
+		$(function() {$('[autofocus]').focus()});
 	}
 	else {
 		$('.note').html("你没有找到所有的入声字，请继续尝试");
